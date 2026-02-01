@@ -1,7 +1,6 @@
 import React, { useState, useCallback, useEffect } from 'react';
 import ReactDOM from 'react-dom/client';
 
-import CustomerForm from './components/CustomerForm';
 import AdminLogin from './components/AdminLogin';
 import AdminDashboard from './components/AdminDashboard';
 
@@ -10,7 +9,7 @@ import { WarningIcon } from './components/Icons';
 import type { Appointment, AppointmentStatus } from './types';
 
 const App = () => {
-    const [page, setPage] = useState<'customer' | 'adminLogin' | 'adminDashboard'>('customer');
+    const [page, setPage] = useState<'adminLogin' | 'adminDashboard'>('adminLogin');
     const [appointments, setAppointments] = useState<Appointment[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -50,69 +49,6 @@ const App = () => {
         }
     }, []);
 
-    const handleAppointmentSubmit = async (name: string, phone: string, imageFiles: File[]) => {
-        if (!supabase) {
-            throw new Error("Supabase client not initialized.");
-        }
-        
-        const uploadPromises = imageFiles.map(file => {
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${crypto.randomUUID()}.${fileExt}`;
-            const filePath = `${fileName}`;
-            return supabase.storage.from('wheel-images').upload(filePath, file);
-        });
-
-        const uploadResults = await Promise.all(uploadPromises);
-
-        const urls: string[] = [];
-        for (const result of uploadResults) {
-            if (result.error) {
-                throw new Error(`Image upload failed: ${result.error.message}`);
-            }
-            const { data } = supabase.storage.from('wheel-images').getPublicUrl(result.data.path);
-            if (!data?.publicUrl) {
-                throw new Error(`Could not get public URL for path ${result.data.path}`);
-            }
-            urls.push(data.publicUrl);
-        }
-
-        const { data: newAppointment, error: insertError } = await supabase
-            .from('appointments')
-            .insert({
-                customer_name: name,
-                customer_phone: phone,
-                image_urls: urls,
-                status: 'Pending',
-                admin_notes: '',
-            })
-            .select()
-            .single();
-
-        if (insertError) {
-            throw new Error(`Database insert failed: ${insertError.message}`);
-        }
-
-        // Sync to Google Sheet if configured
-        if (sheetBestUrl && newAppointment) {
-            try {
-                await fetch(sheetBestUrl, {
-                    method: 'POST',
-                    mode: 'cors',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ 
-                        ...newAppointment,
-                        image_urls: Array.isArray(newAppointment.image_urls) ? newAppointment.image_urls.join(', ') : '',
-                    }),
-                });
-            } catch (sheetError) {
-                console.warn("Failed to sync new appointment to Google Sheet:", sheetError);
-            }
-        }
-        
-        if (page === 'adminDashboard') {
-            await fetchAppointments();
-        }
-    };
 
     const handleUpdateAppointment = async (id: string, newStatus: AppointmentStatus) => {
          if (!supabase) return;
@@ -156,7 +92,7 @@ const App = () => {
         } catch (e) {
             console.warn('Could not clear admin auth from localStorage', e);
         }
-        setPage('customer');
+        setPage('adminLogin');
     };
     const navigateToAdminLogin = () => {
         try {
@@ -170,7 +106,6 @@ const App = () => {
         }
         setPage('adminLogin');
     };
-    const navigateToCustomerView = () => setPage('customer');
     
     const renderPage = () => {
         if (!supabase) {
@@ -188,9 +123,8 @@ const App = () => {
                 return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
             case 'adminDashboard':
                 return <AdminDashboard appointments={appointments} onUpdateAppointment={handleUpdateAppointment} loading={loading} onRefresh={fetchAppointments} />;
-            case 'customer':
             default:
-                return <CustomerForm onAppointmentSubmit={handleAppointmentSubmit} />;
+                return <AdminLogin onLoginSuccess={handleLoginSuccess} />;
         }
     };
     
@@ -198,7 +132,7 @@ const App = () => {
         switch (page) {
             case 'adminLogin': return { main: 'Admin Login', sub: 'Access the appointments dashboard' };
             case 'adminDashboard': return { main: '', sub: '' };
-            case 'customer': default: return { main: 'WheelCheck', sub: 'Book Your Wheel & Rim Appointment' };
+            default: return { main: '', sub: '' };
         }
     };
 
@@ -207,8 +141,6 @@ const App = () => {
     return (
         <div className="bg-gray-100 text-gray-800 min-h-screen flex flex-col items-center p-4 font-sans">
             <header className="w-full max-w-7xl mx-auto flex justify-end py-2">
-                {page === 'customer' && <button onClick={navigateToAdminLogin} className="text-sm text-gray-600 hover:text-blue-600">Admin Panel</button>}
-                {page === 'adminLogin' && <button onClick={navigateToCustomerView} className="text-sm text-gray-600 hover:text-blue-600">Customer View</button>}
                 {page === 'adminDashboard' && <button onClick={handleLogout} className="text-sm text-gray-600 hover:text-blue-600">Logout</button>}
             </header>
              <main className="w-full transition-all duration-300" style={{ maxWidth: page === 'adminDashboard' ? '64rem' : '32rem' }}>
