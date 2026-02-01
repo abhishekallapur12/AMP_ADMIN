@@ -17,18 +17,30 @@ const AdminLogin = ({ onLoginSuccess }: { onLoginSuccess: () => void }) => {
     };
 
     return (
-        <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-                <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">Email</label>
-                <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="admin@wheelcheck.com" required />
+        <div className="w-full max-w-md mx-auto">
+            <div className="flex flex-col items-center mb-6">
+                <img src="/logo.png" alt="AMPtech" className="w-40 h-auto mb-4" />
+           
+                <p className="text-sm text-gray-600">Sign in to manage appointments</p>
             </div>
-            <div>
-                <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">Password</label>
-                <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="••••••••" required />
-            </div>
-            {error && <div className="p-4 text-sm text-red-800 rounded-lg bg-red-50" role="alert">{error}</div>}
-            <button type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Login</button>
-        </form>
+
+            <form onSubmit={handleLogin} className="space-y-4 bg-white p-6 rounded-lg shadow-sm border">
+                <div>
+                    <label htmlFor="email" className="block mb-2 text-sm font-medium text-gray-700">Email</label>
+                    <input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="admin@wheelcheck.com" required />
+                </div>
+                <div>
+                    <label htmlFor="password" className="block mb-2 text-sm font-medium text-gray-700">Password</label>
+                    <input type="password" id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5" placeholder="••••••••" required />
+                </div>
+                {error && <div className="p-3 text-sm text-red-800 rounded-lg bg-red-50" role="alert">{error}</div>}
+                <button type="submit" className="w-full text-white bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Login</button>
+                <div className="flex items-center justify-between text-sm text-gray-500 mt-2">
+                    <a className="hover:underline" href="#">Forgot password?</a>
+                    <span>Need help? <a href="mailto:support@amptech.co.in" className="text-blue-600 hover:underline">Contact</a></span>
+                </div>
+            </form>
+        </div>
     );
 };
 

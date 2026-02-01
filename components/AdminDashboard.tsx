@@ -502,7 +502,10 @@ const AdminDashboard = ({
   /* ================= RENDER ================= */
   return (
     <div className="w-full">
-      <h2 className="text-2xl font-bold mb-6">Admin Dashboard</h2>
+      <div className="flex items-center gap-4 mb-6">
+        <img src="/logo.png" alt="AMPtech" className="w-36 h-auto" />
+        <h2 className="text-2xl font-bold">Admin Dashboard</h2>
+      </div>
 
       {/* SUMMARY */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
